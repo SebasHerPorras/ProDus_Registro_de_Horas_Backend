@@ -1,0 +1,15 @@
+# Framework
+Django>=6.0.2
+djangorestframework>=3.16.1
+
+# Autenticación JWT
+djangorestframework-simplejwt>=5.5.1
+
+# CORS para frontend
+django-cors-headers>=4.9.0
+
+# Variables de entorno
+python-decouple>=3.8
+
+# Base de datos PostgreSQL
+psycopg2-binary>=2.9.11
