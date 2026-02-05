@@ -214,3 +214,11 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Database
+backend/db.sqlite3

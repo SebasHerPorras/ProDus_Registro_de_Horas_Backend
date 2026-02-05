@@ -135,6 +135,15 @@ class Assistant(models.Model):
     hire_date = models.DateField(
         verbose_name='Fecha de contratación'
     )
+    supervisor = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='supervised_assistants',
+        verbose_name='Supervisor',
+        help_text='Coordinador de proyecto que supervisa a este asistente'
+    )
     is_active = models.BooleanField(
         default=True,
         verbose_name='Está activo'

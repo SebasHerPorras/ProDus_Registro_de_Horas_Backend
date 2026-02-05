@@ -84,7 +84,8 @@ class AssistantService:
     def get_assistants_by_coordinator(coordinator_user_id: int):
         """
         Obtiene los asistentes supervisados por un coordinador.
-        (Esto requiere implementar la relación de supervisión)
         """
-        # TODO: Implementar cuando se defina la relación de supervisión
-        return Assistant.objects.select_related('user', 'user__person').filter(is_active=True)
+        return Assistant.objects.select_related('user', 'user__person').filter(
+            supervisor_id=coordinator_user_id,
+            is_active=True
+        )
