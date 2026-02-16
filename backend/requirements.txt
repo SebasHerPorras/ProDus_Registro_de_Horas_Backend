@@ -10,6 +10,10 @@ django-cors-headers>=4.9.0
 
 # Variables de entorno
 python-decouple>=3.8
+python-dotenv>=1.0.1
 
 # Base de datos PostgreSQL
 psycopg2-binary>=2.9.11
+
+drf-yasg>=1.21.0
+
