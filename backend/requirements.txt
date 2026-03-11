@@ -17,3 +17,6 @@ psycopg2-binary>=2.9.11
 
 drf-yasg>=1.21.0
 
+# Archivos estáticos en producción
+whitenoise>=6.5.0
+

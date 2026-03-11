@@ -18,6 +18,16 @@ def validate_institute_ip_addr_view(request):
     result = validate_institute_ip_addr(request)
     return Response(result)
 
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def logout_view(request):
+    """
+    Endpoint para cerrar sesión.
+    En sistemas stateless con JWT, no es necesario invalidar en el servidor,
+    pero puede usarse para auditoría o si se implementa blacklist de tokens.
+    """
+    return Response({'detail': 'Sesión cerrada correctamente'}, status=200)
+
 class CustomTokenObtainPairView(TokenObtainPairView):
     """
     Vista personalizada para obtener tokens JWT.
