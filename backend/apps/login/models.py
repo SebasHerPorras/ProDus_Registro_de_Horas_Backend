@@ -2,6 +2,23 @@ from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, Permis
 from django.db import models
 
 
+class Role(models.Model):
+    code = models.CharField(max_length=50, unique=True, verbose_name='Código')
+
+    def save(self, *args, **kwargs):
+        self.code = (self.code or '').strip().lower()
+        super().save(*args, **kwargs)
+
+    class Meta:
+        db_table = 'role'
+        verbose_name = 'Rol'
+        verbose_name_plural = 'Roles'
+        ordering = ['code']
+
+    def __str__(self):
+        return self.code
+
+
 class UserManager(BaseUserManager):
     def create_user(self, username, password=None, **extra_fields):
         if not username:
@@ -22,7 +39,16 @@ class UserManager(BaseUserManager):
 
 
 class User(AbstractBaseUser, PermissionsMixin):
+    full_name = models.CharField(max_length=150, default='', verbose_name='Nombre completo')
     username = models.CharField(max_length=255, unique=True, verbose_name='Nombre de usuario')
+    role = models.ForeignKey(
+        Role,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name='users',
+        verbose_name='Rol',
+    )
     is_admin = models.BooleanField(default=False, verbose_name='Es administrador')
     is_active = models.BooleanField(default=True, verbose_name='Está activo')
     is_staff = models.BooleanField(default=False, verbose_name='Es staff')
@@ -40,7 +66,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         verbose_name_plural = 'Usuarios'
 
     def __str__(self):
-        return self.username
+        return self.full_name or self.username
 
 
 class AllowedIPRange(models.Model):

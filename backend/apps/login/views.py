@@ -1,5 +1,5 @@
 from rest_framework import status, viewsets
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.views import TokenObtainPairView
@@ -28,6 +28,12 @@ def logout_view(request):
     return Response({'detail': 'Sesión cerrada correctamente'}, status=status.HTTP_200_OK)
 
 
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def me_view(request):
+    return Response({'ok': True, 'user': UserSerializer(request.user).data}, status=status.HTTP_200_OK)
+
+
 class CustomTokenObtainPairView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer
     permission_classes = [AllowAny]
@@ -37,6 +43,10 @@ class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all().order_by('username')
     serializer_class = UserSerializer
     permission_classes = [IsAuthenticated, IsAdmin]
+
+    @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated])
+    def me(self, request):
+        return Response({'ok': True, 'user': UserSerializer(request.user).data}, status=status.HTTP_200_OK)
 
 
 class AllowedIPRangeViewSet(viewsets.ModelViewSet):
