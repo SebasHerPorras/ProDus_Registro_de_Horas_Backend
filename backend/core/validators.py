@@ -58,7 +58,7 @@ def is_valid_institute_ip(request):
         return True
     
     # Import aquí para evitar circular imports
-    from apps.authentication_authorization.models import AllowedIPRange
+    from apps.login.models import AllowedIPRange
     
     client_ip = get_client_ip(request)
     

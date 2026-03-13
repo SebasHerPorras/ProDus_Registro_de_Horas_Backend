@@ -2,7 +2,7 @@
 Permisos personalizados para el proyecto.
 """
 from rest_framework.permissions import BasePermission
-from apps.authentication_authorization.validators import is_valid_institute_ip
+from apps.login.validators import is_valid_institute_ip
 
 
 class IsFromInstitute(BasePermission):
@@ -33,9 +33,7 @@ class IsProjectCoordinator(BasePermission):
     message = "Se requieren permisos de coordinador de proyecto."
     
     def has_permission(self, request, view):
-        if not request.user or not request.user.is_authenticated:
-            return False
-        return hasattr(request.user, 'person') and request.user.person.role == 'PROJECT_COORDINATOR'
+        return False
 
 
 class IsGeneralCoordinator(BasePermission):
@@ -46,9 +44,7 @@ class IsGeneralCoordinator(BasePermission):
     message = "Se requieren permisos de coordinador general."
     
     def has_permission(self, request, view):
-        if not request.user or not request.user.is_authenticated:
-            return False
-        return hasattr(request.user, 'person') and request.user.person.role == 'GENERAL_COORDINATOR'
+        return False
 
 
 class IsAssistant(BasePermission):
@@ -58,6 +54,4 @@ class IsAssistant(BasePermission):
     message = "Se requieren permisos de asistente."
     
     def has_permission(self, request, view):
-        if not request.user or not request.user.is_authenticated:
-            return False
-        return hasattr(request.user, 'assistant')
+        return False

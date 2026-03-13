@@ -51,12 +51,10 @@ def api_root(request):
             'auth': {
                 'login': '/api/auth/login/',
                 'refresh': '/api/auth/refresh/',
+                'validate_ip': '/api/auth/validate-institute-ip/',
             },
             'users': '/api/users/',
-            'assistants': '/api/assistants/',
-            'schedules': '/api/schedules/',
-            'activities': '/api/activities/',
-            'reports': '/api/reports/',
+            'allowed_ip_ranges': '/api/allowed-ip-ranges/',
         }
     })
 
@@ -75,11 +73,7 @@ urlpatterns = [
     path('api/', api_root, name='api-root'),
 
     # Apps
-    path('api/', include('apps.authentication_authorization.urls')),
-    path('api/', include('apps.users.urls')),
-    path('api/', include('apps.schedules.urls')),
-    path('api/', include('apps.activities.urls')),
-    path('api/', include('apps.reports.urls')),
+    path('api/', include('apps.login.urls')),
 ]
 
 
