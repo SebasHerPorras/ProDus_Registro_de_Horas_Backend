@@ -1,0 +1,45 @@
+from rest_framework import status, viewsets
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.response import Response
+from rest_framework_simplejwt.views import TokenObtainPairView
+
+from core.permissions import IsAdmin
+
+from .models import AllowedIPRange, User
+from .serializers import (
+    AllowedIPRangeSerializer,
+    CustomTokenObtainPairSerializer,
+    UserSerializer,
+)
+from .services import validate_institute_ip_addr
+
+
+@api_view(['POST', 'GET'])
+@permission_classes([AllowAny])
+def validate_institute_ip_addr_view(request):
+    result = validate_institute_ip_addr(request)
+    return Response(result)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def logout_view(request):
+    return Response({'detail': 'Sesión cerrada correctamente'}, status=status.HTTP_200_OK)
+
+
+class CustomTokenObtainPairView(TokenObtainPairView):
+    serializer_class = CustomTokenObtainPairSerializer
+    permission_classes = [AllowAny]
+
+
+class UserViewSet(viewsets.ModelViewSet):
+    queryset = User.objects.all().order_by('username')
+    serializer_class = UserSerializer
+    permission_classes = [IsAuthenticated, IsAdmin]
+
+
+class AllowedIPRangeViewSet(viewsets.ModelViewSet):
+    queryset = AllowedIPRange.objects.all().order_by('-is_active', 'network')
+    serializer_class = AllowedIPRangeSerializer
+    permission_classes = [IsAuthenticated, IsAdmin]
