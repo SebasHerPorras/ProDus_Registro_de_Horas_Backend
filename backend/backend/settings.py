@@ -66,7 +66,7 @@ INSTALLED_APPS = [
     'drf_yasg',
 
     # Local apps
-    'apps.login',
+    'apps.users',
 ]
 
 # ============================================
@@ -153,7 +153,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # Custom User Model
 # ============================================
 
-AUTH_USER_MODEL = 'login.User'
+AUTH_USER_MODEL = 'users.User'
 
 # ============================================
 # Django REST Framework

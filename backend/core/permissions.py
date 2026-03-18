@@ -2,7 +2,7 @@
 Permisos personalizados para el proyecto.
 """
 from rest_framework.permissions import BasePermission
-from apps.login.validators import is_valid_institute_ip
+from apps.users.validators import is_valid_institute_ip
 
 
 class IsFromInstitute(BasePermission):

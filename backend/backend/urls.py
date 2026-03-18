@@ -73,7 +73,7 @@ urlpatterns = [
     path('api/', api_root, name='api-root'),
 
     # Apps
-    path('api/', include('apps.login.urls')),
+    path('api/', include('apps.users.urls')),
 ]
 
 
