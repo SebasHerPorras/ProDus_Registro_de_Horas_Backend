@@ -69,6 +69,33 @@ class User(AbstractBaseUser, PermissionsMixin):
         return self.full_name or self.username
 
 
+class Assistant(models.Model):
+    user = models.OneToOneField(
+        User,
+        on_delete=models.CASCADE,
+        primary_key=True,
+        related_name='assistant',
+        verbose_name='Usuario',
+    )
+    start_date = models.DateField(verbose_name='Fecha de inicio')
+    end_date = models.DateField(null=True, blank=True, verbose_name='Fecha de finalización')
+    weekly_hours = models.IntegerField(verbose_name='Horas semanales')
+
+    class Meta:
+        db_table = 'assistant'
+        verbose_name = 'Asistente'
+        verbose_name_plural = 'Asistentes'
+        constraints = [
+            models.CheckConstraint(
+                condition=models.Q(weekly_hours__gt=0),
+                name='assistant_weekly_hours_gt_0',
+            ),
+        ]
+
+    def __str__(self):
+        return self.user.full_name or self.user.username
+
+
 class AllowedIPRange(models.Model):
     network = models.CharField(
         max_length=50,
