@@ -6,9 +6,11 @@ from .views import (
     AllowedIPRangeViewSet,
     CustomTokenObtainPairView,
     UserViewSet,
+    list_assistants_view,
     logout_view,
     me_view,
     validate_institute_ip_addr_view,
+    create_assistant_view,
 )
 
 router = DefaultRouter()
@@ -21,5 +23,8 @@ urlpatterns = [
     path('auth/logout/', logout_view, name='logout'),
     path('auth/me/', me_view, name='auth_me'),
     path('auth/validate-institute-ip/', validate_institute_ip_addr_view, name='validate_institute_ip_addr'),
+    path('assistants/', create_assistant_view, name='create_assistant'),
+    path('assistants/create/', create_assistant_view, name='create_assistant_legacy'),
+    path('assistants/list/', list_assistants_view, name='list_assistants'),
     path('', include(router.urls)),
 ]
