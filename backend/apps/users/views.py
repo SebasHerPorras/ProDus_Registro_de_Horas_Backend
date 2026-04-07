@@ -4,14 +4,17 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.views import TokenObtainPairView
 
-from core.permissions import IsAdmin
+from core.permissions import IsAdmin, IsAdminOrCoordinator, IsFromInstitute 
 
-from .models import AllowedIPRange, User
+from .models import AllowedIPRange, Assistant, User
 from .serializers import (
     AllowedIPRangeSerializer,
+    AssistantCreateSerializer,
     CustomTokenObtainPairSerializer,
     UserSerializer,
+    AssistantListSerializer,
 )
+
 from .services import validate_institute_ip_addr
 
 
@@ -33,6 +36,20 @@ def logout_view(request):
 def me_view(request):
     return Response({'ok': True, 'user': UserSerializer(request.user).data}, status=status.HTTP_200_OK)
 
+@api_view(['POST'])
+@permission_classes([IsAuthenticated, IsAdminOrCoordinator])
+def create_assistant_view(request):
+    serializer = AssistantCreateSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+    data = serializer.save()
+    return Response({'ok': True, **data}, status=status.HTTP_201_CREATED)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated, IsAdminOrCoordinator])
+def list_assistants_view(request):
+    queryset = Assistant.objects.select_related('user').order_by('user__full_name')
+    serializer = AssistantListSerializer(queryset, many=True)
+    return Response({'ok': True, 'results': serializer.data}, status=status.HTTP_200_OK)
 
 class CustomTokenObtainPairView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer

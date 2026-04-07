@@ -23,6 +23,20 @@ class IsAdmin(BasePermission):
     
     def has_permission(self, request, view):
         return request.user and request.user.is_authenticated and request.user.is_admin
+    
+class IsAdminOrCoordinator(BasePermission):
+    message = "Se requieren permisos de administrador o coordinador."
+
+    def has_permission(self, request, view):
+        user = request.user
+        if not user or not user.is_authenticated:
+            return False
+
+        if user.is_admin:
+            return True
+
+        role_code = (getattr(user.role, 'code', '') or '').strip().lower()
+        return role_code in ['coordinador', 'coordinator']
 
 
 class IsProjectCoordinator(BasePermission):
