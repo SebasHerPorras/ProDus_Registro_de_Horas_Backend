@@ -79,6 +79,11 @@ class AssistantCreateSerializer(serializers.Serializer):
     def validate(self, attrs):
         if attrs['password'] != attrs['password_confirm']:
             raise serializers.ValidationError({'password_confirm': 'Las contraseñas no coinciden.'})
+
+        end_date = attrs.get('end_date')
+        if end_date and end_date < attrs['start_date']:
+            raise serializers.ValidationError({'end_date': 'La fecha de finalización no puede ser anterior a la fecha de inicio.'})
+
         return attrs
 
     def create(self, validated_data):
