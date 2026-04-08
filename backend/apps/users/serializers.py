@@ -5,6 +5,7 @@ from django.db import transaction
 from apps.schedules.models import Schedule, ScheduleBlock
 from apps.schedules.serializers import ScheduleBlockCreateSerializer
 from .models import AllowedIPRange, Role, User, Assistant
+from .services import username_exists
 
 
 class RoleSerializer(serializers.ModelSerializer):
@@ -71,7 +72,7 @@ class AssistantCreateSerializer(serializers.Serializer):
     schedule_blocks = ScheduleBlockCreateSerializer(many=True)
 
     def validate_username(self, value):
-        if User.objects.filter(username=value).exists():
+        if username_exists(username=value):
             raise serializers.ValidationError('Ya existe un usuario con ese username.')
         return value
 
