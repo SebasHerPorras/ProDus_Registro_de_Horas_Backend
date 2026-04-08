@@ -60,8 +60,8 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         return data
     
 class AssistantCreateSerializer(serializers.Serializer):
-    username = serializers.CharField(max_length=255)
     full_name = serializers.CharField(max_length=150)
+    username = serializers.CharField(max_length=255)
     password = serializers.CharField(write_only=True, min_length=8)
     password_confirm = serializers.CharField(write_only=True, min_length=8)
     is_active = serializers.BooleanField(required=False, default=True)
