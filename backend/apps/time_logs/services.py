@@ -1,0 +1,49 @@
+from django.utils import timezone
+from django.core.exceptions import ValidationError
+from apps.time_logs.models import TimeLog, TimeLogStatus
+
+
+def create_time_log_entry(assistant):
+    """
+    Crea un nuevo registro de TimeLog cuando el asistente inicia jornada.
+    
+    Validaciones:
+    - No debe haber un TimeLog activo (status='IN_PROGRESS') para este asistente
+    
+    Args:
+        assistant (Assistant): El asistente que inicia jornada
+    
+    Returns:
+        TimeLog: El nuevo registro creado
+    
+    Raises:
+        ValidationError: Si ya hay una jornada activa
+    """
+    
+    # Verificar que no haya TimeLog activo (IN_PROGRESS)
+    active_log = TimeLog.objects.filter(
+        assistant=assistant,
+        status__code='IN_PROGRESS'
+    ).first()
+    
+    if active_log:
+        raise ValidationError(
+            "Ya tienes una jornada activa. Finalízala antes de iniciar una nueva."
+        )
+    
+    # Obtener o crear el status 'IN_PROGRESS'
+    in_progress_status, _ = TimeLogStatus.objects.get_or_create(
+        code='IN_PROGRESS',
+        defaults={'is_final': False}
+    )
+    
+    # Crear el TimeLog
+    time_log = TimeLog.objects.create(
+        assistant=assistant,
+        check_in=timezone.now(),
+        status=in_progress_status,
+        work_description='',
+        break_minutes=0
+    )
+    
+    return time_log
