@@ -95,3 +95,23 @@ class AssistantListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Assistant
         fields = ['id', 'username', 'full_name', 'is_active']
+
+class AssistantDetailSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField(source='user.id', read_only=True)
+    username = serializers.CharField(source='user.username', read_only=True)
+    full_name = serializers.CharField(source='user.full_name', read_only=True)
+    is_active = serializers.CharField(source='user.is_active ', read_only=True)
+    role = serializers.CharField(source='user.role', read_only=True)
+
+    class Meta:
+        model = Assistant
+        fields = [
+            'id',
+            'username',
+            'full_name',
+            'is_active',
+            'role',
+            'start_date',
+            'end_date',
+            'weekly_hours',
+        ]
