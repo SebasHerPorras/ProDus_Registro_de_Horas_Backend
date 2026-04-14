@@ -20,11 +20,8 @@ def create_time_log_entry(assistant):
         ValidationError: Si ya hay una jornada activa
     """
     
-    # Verificar que no haya TimeLog activo (IN_PROGRESS)
-    active_log = TimeLog.objects.filter(
-        assistant=assistant,
-        status__code='IN_PROGRESS'
-    ).first()
+    # Verificar en BD si ya existe una jornada activa para el asistente.
+    active_log = get_active_time_log(assistant)
     
     if active_log:
         raise ValidationError(
