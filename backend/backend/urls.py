@@ -76,6 +76,7 @@ urlpatterns = [
     path('api/', include([
         path('users/', include('apps.users.urls')),
         path('timelogs/', include('apps.time_logs.urls')),
+        path('projects/', include('apps.projects.urls')),
     ])),
 ]
 
