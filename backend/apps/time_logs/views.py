@@ -11,7 +11,10 @@ from apps.time_logs.services import (
     close_time_log_entry,
     get_current_time_log_state,
 )
-from apps.time_logs.serializers import TimeLogSerializer
+from apps.time_logs.serializers import (
+    TimeLogSerializer,
+    WorkSessionCloseInputSerializer,
+)
 
 
 class WorkSessionStartView(APIView):
@@ -117,8 +120,14 @@ class WorkSessionCloseView(APIView):
                 status=status.HTTP_403_FORBIDDEN
             )
 
+        payload_serializer = WorkSessionCloseInputSerializer(data=request.data)
+        payload_serializer.is_valid(raise_exception=True)
+
         try:
-            time_log = close_time_log_entry(assistant)
+            time_log = close_time_log_entry(
+                assistant,
+                payload=payload_serializer.validated_data,
+            )
         except ValidationError as e:
             return Response(
                 {'error': str(e)},

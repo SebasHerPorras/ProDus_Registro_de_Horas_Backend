@@ -1,7 +1,8 @@
 from django.utils import timezone
 from django.core.exceptions import ValidationError
 from apps.time_logs.models import TimeLog, TimeLogStatus
-
+from apps.projects.models import Project
+from apps.users.models import User
 
 def create_time_log_entry(assistant):
     """
@@ -74,7 +75,8 @@ def get_current_time_log_state(assistant):
     }
 
 
-def close_time_log_entry(assistant):
+def close_time_log_entry(assistant, payload=None):
+    payload = payload or {}
     active_time_log = get_active_time_log(assistant)
 
     if not active_time_log:
@@ -85,22 +87,52 @@ def close_time_log_entry(assistant):
         defaults={'is_final': True},
     )
 
-    # Cierre básico: la jornada se cierra con hora servidor y sin metadatos de aprobación.
+    project_id = payload.get('project_id')
+    manager_user_id = payload.get('manager_user_id')
+    notes = payload.get('notes', '')
+    activities = payload.get('activities', '')
+    break_minutes = payload.get('break_minutes', 0)
+
+    project = None
+    if project_id is not None:
+        project = Project.objects.filter(id=project_id, is_active=True).first()
+        if not project:
+            raise ValidationError('Proyecto inválido o inactivo.')
+
+    manager_user = None
+    if manager_user_id is not None:
+        manager_user = User.objects.filter(
+            id=manager_user_id,
+            is_active=True,
+            role__code__in=['coordinador', 'coordinator'],
+        ).first()
+        if not manager_user:
+            raise ValidationError('Encargado inválido. Debe ser un coordinador activo.')
+
+    # Cierre real con hora de servidor + datos del formulario
     active_time_log.check_out = timezone.now()
     active_time_log.status = closed_status
-    active_time_log.break_minutes = 0
+    active_time_log.project = project
+    active_time_log.manager_user = manager_user
+    active_time_log.activities = activities
+    active_time_log.decision_comment = notes
+    active_time_log.break_minutes = break_minutes
+
+    # Mantener flujo simple: sin metadatos de aprobación en esta fase
     active_time_log.decided_by = None
     active_time_log.decided_at = None
-    active_time_log.decision_comment = ''
 
     active_time_log.save(
         update_fields=[
             'check_out',
             'status',
+            'project',
+            'manager_user',
+            'activities',
+            'decision_comment',
             'break_minutes',
             'decided_by',
             'decided_at',
-            'decision_comment',
         ]
     )
     return active_time_log

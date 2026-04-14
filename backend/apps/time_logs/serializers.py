@@ -29,3 +29,11 @@ class TimeLogSerializer(serializers.ModelSerializer):
 
     def get_is_active(self, obj):
         return obj.check_out is None and getattr(obj.status, 'code', None) == 'IN_PROGRESS'
+
+
+class WorkSessionCloseInputSerializer(serializers.Serializer):
+    project_id = serializers.IntegerField(required=False, allow_null=True)
+    manager_user_id = serializers.IntegerField(required=False, allow_null=True)
+    notes = serializers.CharField(required=False, allow_blank=True, max_length=500)
+    activities = serializers.CharField(required=False, allow_blank=True)
+    break_minutes = serializers.IntegerField(required=False, min_value=0, default=0)

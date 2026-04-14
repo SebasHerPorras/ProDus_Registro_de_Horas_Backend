@@ -29,6 +29,16 @@ class TimeLog(models.Model):
         related_name='timelogs',
         verbose_name='Asistente'
     )
+    # referencia opcional al proyecto en el que se trabajó durante el período registrado
+    project = models.ForeignKey(
+        'projects.Project',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='time_logs',
+        verbose_name='Proyecto'
+    )
+    
     # atributos de entrada y salida
     # check_in es obligatorio, mientras que check_out es opcional para permitir registros de horas en curso
     # el check in captura la fecha y hora del sistema apenas se crea el registro
@@ -62,16 +72,33 @@ class TimeLog(models.Model):
         related_name='approved_timelogs',
         verbose_name='Decidido por'
     )
+    manager_user = models.ForeignKey(
+        'users.User',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='managed_time_logs',
+        verbose_name='Encargado'
+    )    
     decided_at = models.DateTimeField(
         null=True,
         blank=True,
         verbose_name='Fecha de decisión'
     )
-    decision_comment = models.TextField(
+    decision_comment = models.CharField(
+        max_length=500,
         blank=True,
         default='',
-        verbose_name='Comentario de decisión'
+        verbose_name='Notas'
     )
+    activities = models.TextField(
+        blank=True,
+        default='',
+        verbose_name='Actividades realizadas'
+    )
+    
+    
+    
 
     class Meta:
         db_table = 'time_log'
