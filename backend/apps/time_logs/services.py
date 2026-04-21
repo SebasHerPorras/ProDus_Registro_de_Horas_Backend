@@ -1,5 +1,6 @@
 from django.utils import timezone
 from django.core.exceptions import ValidationError
+from asgiref.sync import sync_to_async
 from apps.time_logs.models import TimeLog, TimeLogStatus
 from apps.projects.models import Project
 from apps.users.models import User
@@ -117,6 +118,7 @@ def close_time_log_entry(assistant, payload=None):
     active_time_log.activities = activities
     active_time_log.decision_comment = notes
     active_time_log.break_minutes = break_minutes
+    active_time_log.closed_by = TimeLog.ClosedBy.USER
 
     # Mantener flujo simple: sin metadatos de aprobación en esta fase
     active_time_log.decided_by = None
@@ -131,8 +133,48 @@ def close_time_log_entry(assistant, payload=None):
             'activities',
             'decision_comment',
             'break_minutes',
+            'closed_by',
             'decided_by',
             'decided_at',
         ]
     )
     return active_time_log
+
+
+def _close_open_time_logs_by_system_sync():
+    closed_status, _ = TimeLogStatus.objects.get_or_create(
+        code='CLOSED',
+        defaults={'is_final': True},
+    )
+
+    opened_logs = TimeLog.objects.filter(
+        status__code='IN_PROGRESS',
+        check_out__isnull=True,
+    )
+
+    total_opened = opened_logs.count()
+    if total_opened == 0:
+        return 0
+
+    # Cierre automático de sistema con valores default de formulario.
+    opened_logs.update(
+        check_out=timezone.now(),
+        status=closed_status,
+        project=None,
+        manager_user=None,
+        activities='',
+        decision_comment='',
+        break_minutes=0,
+        closed_by=TimeLog.ClosedBy.SYSTEM,
+        decided_by=None,
+        decided_at=None,
+    )
+
+    return total_opened
+
+
+async def close_open_time_logs_by_system():
+    return await sync_to_async(
+        _close_open_time_logs_by_system_sync,
+        thread_sensitive=True,
+    )()

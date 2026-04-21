@@ -17,6 +17,7 @@ class TimeLogAdmin(admin.ModelAdmin):
 		'assistant_full_name',
 		'assistant_username',
 		'status',
+		'closed_by',
 		'check_in',
 		'check_out',
 		'project',
@@ -25,7 +26,7 @@ class TimeLogAdmin(admin.ModelAdmin):
 		'has_close_form_data',
 	)
 	list_display_links = ('id', 'assistant_full_name')
-	list_filter = ('status', 'project', 'manager_user', 'check_in', 'check_out')
+	list_filter = ('status', 'closed_by', 'project', 'manager_user', 'check_in', 'check_out')
 	search_fields = (
 		'assistant__user__full_name',
 		'assistant__user__username',
@@ -44,6 +45,7 @@ class TimeLogAdmin(admin.ModelAdmin):
 		'work_description',
 		'break_minutes',
 		'status',
+		'closed_by',
 		'decided_by',
 		'manager_user',
 		'decided_at',
@@ -53,7 +55,7 @@ class TimeLogAdmin(admin.ModelAdmin):
 
 	fieldsets = (
 		('Información general', {
-			'fields': ('assistant', 'status', 'check_in', 'check_out')
+			'fields': ('assistant', 'status', 'closed_by', 'check_in', 'check_out')
 		}),
 		('Formulario de cierre', {
 			'fields': ('project', 'manager_user', 'activities', 'decision_comment', 'break_minutes')

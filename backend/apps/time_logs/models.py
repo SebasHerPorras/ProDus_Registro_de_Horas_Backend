@@ -22,6 +22,10 @@ class TimeLogStatus(models.Model):
 # Utiliza a timelogstatus para definir el estado del registro, lo que permite una gestión flexible de los estados
 # (pendiente, aprobado, rechazado, etc.) sin necesidad de modificar el modelo TimeLog cada vez que se agregue un nuevo estado.
 class TimeLog(models.Model):
+    class ClosedBy(models.TextChoices):
+        USER = 'USER', 'Usuario'
+        SYSTEM = 'SYSTEM', 'Sistema'
+
     # referencia al asistente que hizo el registro de horas
     assistant = models.ForeignKey(
         'users.Assistant',
@@ -90,6 +94,14 @@ class TimeLog(models.Model):
         blank=True,
         default='',
         verbose_name='Notas'
+    )
+    closed_by = models.CharField(
+        max_length=10,
+        choices=ClosedBy.choices,
+        null=True,
+        blank=True,
+        default=None,
+        verbose_name='Cerrado por'
     )
     activities = models.TextField(
         blank=True,
