@@ -18,7 +18,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['id', 'full_name', 'username', 'role', 'is_admin', 'is_active', 'created_at']
+        fields = ['id', 'full_name', 'username', 'role', 'is_admin', 'is_active', 'needs_password_change', 'created_at']
         read_only_fields = ['id', 'created_at']
 
 
@@ -37,6 +37,7 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         token['full_name'] = user.full_name
         token['role'] = user.role.code if user.role else None
         token['is_admin'] = user.is_admin
+        token['needs_password_change'] = user.needs_password_change
         return token
 
     def validate(self, attrs):
@@ -47,7 +48,7 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
                 raise serializers.ValidationError({'detail': 'Usuario inactivo. Contacte al administrador.'})
 
         data = super().validate(attrs)
-        data['ok'] = True
+        data['ok'] = True 
         data['user'] = {
             'id': self.user.id,
             'full_name': self.user.full_name,
@@ -55,6 +56,7 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
             'is_active': self.user.is_active,
             'role': self.user.role.code if self.user.role else None,
             'is_admin': self.user.is_admin,
+            'needs_password_change': self.user.needs_password_change,
         }
         return data
     
@@ -98,6 +100,7 @@ class AssistantCreateSerializer(serializers.Serializer):
                 full_name=validated_data['full_name'],
                 is_active=validated_data.get('is_active', True),
                 is_admin=False,
+                needs_password_change=True,  # Forzamos cambio de contraseña en el primer login
             )
             user.role = role
             user.save(update_fields=['role'])
@@ -151,3 +154,27 @@ class AssistantListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Assistant
         fields = ['id', 'username', 'full_name', 'is_active']
+
+class ChangePasswordSerializer(serializers.Serializer):
+    current_password = serializers.CharField(write_only=True)
+    new_password = serializers.CharField(write_only=True, min_length=8)
+    new_password_confirm = serializers.CharField(write_only=True, min_length=8)
+    needs_password_change = serializers.BooleanField(required=False, default=False)
+
+    def validate(self, attrs):
+        if attrs['new_password'] != attrs['new_password_confirm']:
+            raise serializers.ValidationError({
+                'new_password_confirm': 'Las contraseñas nuevas no coinciden.'
+            })
+
+        password = attrs['new_password']
+        if not any(char.isupper() for char in password):
+            raise serializers.ValidationError({
+                'new_password': 'Debe tener al menos una mayúscula.'
+            })
+        if not any(char.isdigit() for char in password):
+            raise serializers.ValidationError({
+                'new_password': 'Debe tener al menos un número.'
+            })
+
+        return attrs

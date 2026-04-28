@@ -11,6 +11,7 @@ from .views import (
     me_view,
     validate_institute_ip_addr_view,
     create_assistant_view,
+    change_password_view,
 )
 
 router = DefaultRouter()
@@ -26,5 +27,6 @@ urlpatterns = [
     path('assistants/', create_assistant_view, name='create_assistant'),
     path('assistants/create/', create_assistant_view, name='create_assistant_legacy'),
     path('assistants/list/', list_assistants_view, name='list_assistants'),
+    path('change-password/', change_password_view, name='change_password'),
     path('', include(router.urls)),
 ]
