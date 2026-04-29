@@ -74,6 +74,5 @@ urlpatterns = [
 
     # Apps
     path('api/', include('apps.users.urls')),
+    path('api/', include('apps.schedules.urls')),
 ]
-
-

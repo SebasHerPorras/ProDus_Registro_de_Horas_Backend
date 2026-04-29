@@ -2,7 +2,7 @@ from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 from .models import AllowedIPRange, Role, User, Assistant
-from .services import create_assistant_with_user, username_exists
+from .services import UserService, AssistantService
 
 
 class RoleSerializer(serializers.ModelSerializer):
@@ -68,7 +68,7 @@ class AssistantCreateSerializer(serializers.Serializer):
     weekly_hours = serializers.IntegerField(min_value=1, max_value=168)
 
     def validate_username(self, value):
-        if username_exists(username=value):
+        if UserService.username_exists(username=value):
             raise serializers.ValidationError('Ya existe un usuario con ese username.')
         return value
 
@@ -84,7 +84,7 @@ class AssistantCreateSerializer(serializers.Serializer):
 
     def create(self, validated_data):
         validated_data.pop('password_confirm')
-        return create_assistant_with_user(**validated_data)
+        return AssistantService.create_assistant_with_user(**validated_data)
 
 class AssistantListSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField(source='user.id', read_only=True)
