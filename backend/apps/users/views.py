@@ -14,6 +14,7 @@ from .serializers import (
     ChangePasswordSerializer,
     CustomTokenObtainPairSerializer,
     UserSerializer,
+    AssistantDetailSerializer,
 )
 
 from .services import validate_institute_ip_addr, change_user_password
@@ -42,8 +43,14 @@ def me_view(request):
 def create_assistant_view(request):
     serializer = AssistantCreateSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
-    data = serializer.save()
-    return Response({'ok': True, **data}, status=status.HTTP_201_CREATED)
+    assistant = serializer.save()
+
+    return Response(
+        {
+            'ok': True,
+            'assistant': AssistantDetailSerializer(assistant).data,        
+        },
+        status=status.HTTP_201_CREATED)
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated, IsAdminOrCoordinator])
