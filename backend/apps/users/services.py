@@ -7,13 +7,23 @@ from .models import User, Role, Assistant
 class UserService:
     @staticmethod
     @transaction.atomic
-    def create_user(*, full_name, username, role_code, password, is_active=True, is_admin=False) -> User:
+    def create_user(
+        *,
+        full_name,
+        username,
+        role_code,
+        password,
+        is_active=True,
+        is_admin=False,
+        needs_password_change=False,
+    ) -> User:
         user = User.objects.create_user(
             username=username,
             password=password,
             full_name=full_name,
             is_active=is_active,
             is_admin=is_admin,
+            needs_password_change=needs_password_change,
         )
 
         role, _ = Role.objects.get_or_create(code=role_code)
@@ -36,6 +46,7 @@ class AssistantService:
             password=password,
             is_active=is_active,
             is_admin=False,
+            needs_password_change=True,
         )
 
         assistant = AssistantService().create_assistant(
