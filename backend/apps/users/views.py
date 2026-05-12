@@ -10,13 +10,14 @@ from .models import AllowedIPRange, Assistant, User
 from .serializers import (
     AllowedIPRangeSerializer,
     AssistantCreateSerializer,
+    AssistantListSerializer,
+    ChangePasswordSerializer,
     CustomTokenObtainPairSerializer,
     UserSerializer,
-    AssistantListSerializer,
     AssistantDetailSerializer,
 )
 
-from .services import validate_institute_ip_addr
+from .services import validate_institute_ip_addr, change_user_password
 
 
 @api_view(['POST', 'GET'])
@@ -57,6 +58,30 @@ def list_assistants_view(request):
     queryset = Assistant.objects.select_related('user').order_by('user__full_name')
     serializer = AssistantListSerializer(queryset, many=True)
     return Response({'ok': True, 'results': serializer.data}, status=status.HTTP_200_OK)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def change_password_view(request):
+    serializer = ChangePasswordSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+
+    try:
+        change_user_password(
+            request.user,
+            serializer.validated_data['current_password'],
+            serializer.validated_data['new_password'],
+            serializer.validated_data.get('needs_password_change', False),
+        )
+    except Exception as exc:
+        detail = getattr(exc, 'message_dict', None)
+        if detail:
+            return Response(detail, status=status.HTTP_400_BAD_REQUEST)
+        return Response({'detail': 'No se pudo cambiar la contraseña.'}, status=status.HTTP_400_BAD_REQUEST)
+
+    return Response(
+        {'ok': True, 'detail': 'Contraseña actualizada correctamente.'},
+        status=status.HTTP_200_OK
+    )
 
 class CustomTokenObtainPairView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer

@@ -73,6 +73,10 @@ urlpatterns = [
     path('api/', api_root, name='api-root'),
 
     # Apps
-    path('api/', include('apps.users.urls')),
-    path('api/', include('apps.schedules.urls')),
+    path('api/', include([
+        path('users/', include('apps.users.urls')),
+        path('timelogs/', include('apps.time_logs.urls')),
+        path('projects/', include('apps.projects.urls')),
+        path('schedules/', include('apps.schedules.urls')),
+    ])),
 ]

@@ -54,6 +54,8 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_staff = models.BooleanField(default=False, verbose_name='Es staff')
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='Fecha de creación')
     updated_at = models.DateTimeField(auto_now=True, verbose_name='Fecha de actualización')
+    # nuevo atributo para forzar cambio de contraseña
+    needs_password_change = models.BooleanField(default=False, verbose_name='Necesita cambio de contraseña')
 
     objects = UserManager()
 
