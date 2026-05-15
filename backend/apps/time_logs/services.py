@@ -41,6 +41,7 @@ def create_time_log_entry(assistant):
         assistant=assistant,
         check_in=timezone.now(),
         status=in_progress_status,
+        review_status=None,
         work_description='',
         break_minutes=0
     )
@@ -87,6 +88,10 @@ def close_time_log_entry(assistant, payload=None):
         code='CLOSED',
         defaults={'is_final': True},
     )
+    pending_review_status, _ = TimeLogStatus.objects.get_or_create(
+        code='PENDING',
+        defaults={'is_final': False},
+    )
 
     project_id = payload.get('project_id')
     manager_user_id = payload.get('manager_user_id')
@@ -113,6 +118,7 @@ def close_time_log_entry(assistant, payload=None):
     # Cierre real con hora de servidor + datos del formulario
     active_time_log.check_out = timezone.now()
     active_time_log.status = closed_status
+    active_time_log.review_status = pending_review_status
     active_time_log.project = project
     active_time_log.manager_user = manager_user
     active_time_log.activities = activities
@@ -128,6 +134,7 @@ def close_time_log_entry(assistant, payload=None):
         update_fields=[
             'check_out',
             'status',
+            'review_status',
             'project',
             'manager_user',
             'activities',
@@ -146,6 +153,10 @@ def _close_open_time_logs_by_system_sync():
         code='CLOSED',
         defaults={'is_final': True},
     )
+    pending_review_status, _ = TimeLogStatus.objects.get_or_create(
+        code='PENDING',
+        defaults={'is_final': False},
+    )
 
     opened_logs = TimeLog.objects.filter(
         status__code='IN_PROGRESS',
@@ -160,6 +171,7 @@ def _close_open_time_logs_by_system_sync():
     opened_logs.update(
         check_out=timezone.now(),
         status=closed_status,
+        review_status=pending_review_status,
         project=None,
         manager_user=None,
         activities='',

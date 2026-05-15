@@ -3,10 +3,12 @@ from apps.time_logs.views import (
     WorkSessionStartView,
     WorkSessionCurrentView,
     WorkSessionCloseView,
+    AdminTimeLogFilteredListView,
 )
 
 urlpatterns = [
     path('work-session/start/', WorkSessionStartView.as_view(), name='work-session-start'),
     path('work-session/current/', WorkSessionCurrentView.as_view(), name='work-session-current'),
     path('work-session/close/', WorkSessionCloseView.as_view(), name='work-session-close'),
+    path('admin/filter/', AdminTimeLogFilteredListView.as_view(), name='admin-timelog-filter'),
 ]

@@ -4,8 +4,11 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from django.core.exceptions import ValidationError
 from django.utils import timezone
+from django.db.models import Q
 
 from apps.ip_control.services import validate_ip_access
+from core.permissions import IsAdminOrCoordinator
+from apps.time_logs.models import TimeLog
 from apps.time_logs.services import (
     create_time_log_entry,
     close_time_log_entry,
@@ -14,6 +17,8 @@ from apps.time_logs.services import (
 from apps.time_logs.serializers import (
     TimeLogSerializer,
     WorkSessionCloseInputSerializer,
+    AdminTimeLogFilterInputSerializer,
+    AdminTimeLogListItemSerializer,
 )
 
 
@@ -142,4 +147,52 @@ class WorkSessionCloseView(APIView):
                 'server_now': timezone.now(),
             },
             status=status.HTTP_200_OK
+        )
+
+
+class AdminTimeLogFilteredListView(APIView):
+    permission_classes = [IsAuthenticated, IsAdminOrCoordinator]
+
+    def post(self, request):
+        payload_serializer = AdminTimeLogFilterInputSerializer(data=request.data)
+        payload_serializer.is_valid(raise_exception=True)
+        filters = payload_serializer.validated_data
+
+        month = filters.get('month', None)
+        student_id = filters.get('studentId', None)
+        status_code = filters.get('status', None)
+
+        queryset = TimeLog.objects.select_related(
+            'assistant__user',
+            'status',
+            'review_status',
+            'project',
+        ).all()
+
+        where_clause = Q()
+
+        if month:
+            year, month_number = month.split('-')
+            where_clause &= Q(check_in__year=int(year), check_in__month=int(month_number))
+
+        if student_id:
+            where_clause &= Q(assistant__user__id=student_id)
+
+        if status_code:
+            where_clause &= Q(review_status__code__iexact=status_code)
+
+        queryset = queryset.filter(where_clause).order_by('-check_in')
+
+        serializer = AdminTimeLogListItemSerializer(queryset, many=True)
+        return Response(
+            {
+                'ok': True,
+                'filters': {
+                    'month': month if month else None,
+                    'studentId': student_id if student_id else None,
+                    'status': status_code if status_code else None,
+                },
+                'results': serializer.data,
+            },
+            status=status.HTTP_200_OK,
         )

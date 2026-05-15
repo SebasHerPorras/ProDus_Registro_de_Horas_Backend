@@ -37,3 +37,48 @@ class WorkSessionCloseInputSerializer(serializers.Serializer):
     notes = serializers.CharField(required=False, allow_blank=True, max_length=500)
     activities = serializers.CharField(required=False, allow_blank=True)
     break_minutes = serializers.IntegerField(required=False, min_value=0, default=0)
+
+
+class AdminTimeLogFilterInputSerializer(serializers.Serializer):
+    month = serializers.RegexField(
+        regex=r'^\d{4}-\d{2}$',
+        required=False,
+        allow_null=True,
+    )
+    studentId = serializers.IntegerField(required=False, allow_null=True)
+    status = serializers.ChoiceField(
+        choices=['pending', 'approved', 'rejected'],
+        required=False,
+        allow_null=True,
+    )
+
+
+class AdminTimeLogListItemSerializer(serializers.ModelSerializer):
+    assistant = serializers.SerializerMethodField()
+    status = serializers.CharField(source='review_status.code', read_only=True)
+    month = serializers.SerializerMethodField()
+
+    class Meta:
+        model = TimeLog
+        fields = [
+            'id',
+            'assistant',
+            'month',
+            'check_in',
+            'check_out',
+            'status',
+            'decision_comment',
+        ]
+
+    def get_assistant(self, obj):
+        user = getattr(obj.assistant, 'user', None)
+        return {
+            'id': getattr(user, 'id', None),
+            'username': getattr(user, 'username', None),
+            'full_name': getattr(user, 'full_name', None),
+        }
+
+    def get_month(self, obj):
+        if not obj.check_in:
+            return None
+        return obj.check_in.strftime('%Y-%m')

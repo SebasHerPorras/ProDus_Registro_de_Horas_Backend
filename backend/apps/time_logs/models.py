@@ -68,6 +68,14 @@ class TimeLog(models.Model):
         on_delete=models.PROTECT,
         verbose_name='Estado'
     )
+    review_status = models.ForeignKey(
+        'time_logs.TimeLogStatus',
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name='reviewed_time_logs',
+        verbose_name='Estado de revisión'
+    )
     decided_by = models.ForeignKey(
         'users.User',
         on_delete=models.SET_NULL,
